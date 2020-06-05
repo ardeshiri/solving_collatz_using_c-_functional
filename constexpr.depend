@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1591116671 source:/home/snake/Cods/CodeBlocks/constexpr/src/series.cpp
+
+1591374767 source:/home/snake/Cods/CodeBlocks/constexpr/main.cpp
+	<iostream>
+	"series.h"
+
+1591373848 /home/snake/Cods/CodeBlocks/constexpr/include/series.h
+	<iostream>
+
