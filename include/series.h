@@ -15,7 +15,10 @@ struct sequence
 
 template<size_t...NS>
 using index_sequence = sequence<size_t, NS...>;
+
+
 ///-------------------------------------------------------------------------------------------------------------------------------
+
 
 template< size_t N, typename T, T...NS>
 struct range_to_seq;
@@ -38,6 +41,8 @@ using range_to_sequence = typename range_to_seq< SQ::range_size , typename SQ::r
 
 
 ///-------------------------------------------------------------------------------------------------------------------------------
+
+
 template<typename T, T F, T L, size_t S>  /// first last(including last)
 struct including_range
 {
@@ -50,7 +55,10 @@ struct including_range
 
 template< size_t F, size_t L , size_t S>
 using including_index_range = including_range<size_t,F,L,S>;
+
+
 ///-------------------------------------------------------------------------------------------------------------------------------
+
 
 template<size_t V>
 struct is_odd_:is_odd_<V-2>
@@ -84,6 +92,7 @@ constexpr bool is_even()
 
 ///----
 
+
 template< size_t X, size_t...NS >
 struct if_even_
 {
@@ -103,9 +112,7 @@ template< size_t X, size_t...NS >
 using if_odd = typename if_odd_<X, NS...>::seq;
 
 
-
-
-
+///-------------------------------------------------------------------------------------------------------------------------------
 
 
 template<bool E, size_t N, size_t...NS>
@@ -113,20 +120,84 @@ struct Collatz_sequence_;
 
 template<size_t N, size_t X, size_t...NS>
 struct Collatz_sequence_<true, N, X , NS...>:Collatz_sequence_<is_even<X/2>(),N+1,X/2,X,NS...>
-{};
+{
+    static constexpr size_t num = X;
+};
 
 template<size_t N, size_t X, size_t...NS>
 struct Collatz_sequence_<false, N, X , NS...>:Collatz_sequence_<is_even<(3*X)+1>(), N+1, (3*X)+1,X,NS...>
-{};
+{
+    static constexpr size_t num = X;
+};
+
 
 template<size_t N, size_t...NS>
 struct Collatz_sequence_< false, N , 1 , NS...>
 {
-    using seq = sequence<size_t, N , 1 , NS...> ;
+    static constexpr size_t len = N;
+    static constexpr size_t num = 1;
+    using seq = sequence<size_t, 1 , NS...> ;
 };
 
 template<size_t N>
 using Collatz_sequence = typename Collatz_sequence_< is_even<N>(), 1 , N>::seq;
+
+template<size_t N>
+constexpr size_t Collatz_sequence_len()
+{
+    return Collatz_sequence_<is_even<N>(), 1, N >::len;
+}
+
+///-------------------------------------------------------------------------------------------------------------------------------
+
+
+template<size_t ... Ns>
+struct Collatz_seqs_len_;
+
+template<size_t N, size_t ... NS>
+struct Collatz_seqs_len_<N ,NS...>:Collatz_seqs_len_<N-1, Collatz_sequence_len<N>() ,NS...>
+{
+    static constexpr size_t max_len = (Collatz_sequence_len<N>() > Collatz_seqs_len_<N-1 ,NS...>::max_len )? Collatz_sequence_len<N>():Collatz_seqs_len_<N-1 ,NS...>::max_len ;
+    static constexpr size_t max_len_index = (Collatz_sequence_len<N>() > Collatz_seqs_len_<N-1 ,NS...>::max_len ) ? N: Collatz_seqs_len_<N-1 ,NS...>::max_len_index;
+};
+
+template< size_t ... NS>
+struct Collatz_seqs_len_<1 ,NS...>
+{
+    static constexpr size_t max_len = 1;
+    static constexpr size_t max_len_index = 1;
+    using seq = sequence<size_t, 1, NS...> ;
+};
+
+template<size_t N, size_t ... NS>
+using Z2N_Collatz_seq_lens = typename Collatz_seqs_len_<N ,NS...>::seq;
+
+
+
+///-------------------------------------------------------------------------------------------------------------------------------
+template<size_t a, size_t b>
+constexpr bool less_than( )
+{
+    return (a<b)? true: false;
+}
+
+template<size_t...Ns>
+struct max_num;
+
+template<size_t N, size_t F, size_t...NS>
+struct max_num<N, F, NS...>
+{
+    static constexpr size_t max_val = ((F > max_num<N-1, NS...>::max_val )? F : max_num<N-1, NS...>::max_val);
+};
+
+template<size_t F, size_t...NS>
+struct max_num<1, F, NS...>
+{
+    static constexpr size_t max_val = F;
+};
+
+
+///-------------------------------------------------------------------------------------------------------------------------------
 
 
 
